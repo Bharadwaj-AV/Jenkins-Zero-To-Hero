@@ -16,13 +16,13 @@ pipeline {
 
     stage('Build and Test') {
       steps {
+        sh 'ls -ltr'
         sh '''
         cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
         mvn clean package
         '''
       }
     }
-
     stage('Build and Push Docker Image') {
       environment {
         DOCKER_IMAGE = "avbharadwaj/ultimate-cicd:${BUILD_NUMBER}"
@@ -44,6 +44,10 @@ pipeline {
     }
 
     stage('Update Deployment File') {
+      environment {
+        GIT_REPO_NAME = "Jenkins-Zero-To-Hero"
+        GIT_USER_NAME = "Bharadwaj-AV"
+      }
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
           sh '''
@@ -53,13 +57,14 @@ pipeline {
           sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" \
           java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
 
-          git add .
+          git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
           git commit -m "Update deployment image to version ${BUILD_NUMBER}" || echo "No changes to commit"
 
-          git push https://${GITHUB_TOKEN}@github.com/Bharadwaj-AV/Jenkins-Zero-To-Hero HEAD:main
+          git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
           '''
         }
       }
     }
+
   }
 }
