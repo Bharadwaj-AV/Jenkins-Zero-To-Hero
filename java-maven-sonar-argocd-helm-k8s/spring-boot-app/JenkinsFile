@@ -10,6 +10,7 @@ pipeline {
 
     stage('Checkout') {
       steps {
+        sh 'echo passed'
         git branch: 'main', url: 'https://github.com/Bharadwaj-AV/Jenkins-Zero-To-Hero.git'
       }
     }
@@ -23,6 +24,7 @@ pipeline {
         '''
       }
     }
+
     stage('Build and Push Docker Image') {
       environment {
         DOCKER_IMAGE = "avbharadwaj/ultimate-cicd:${BUILD_NUMBER}"
